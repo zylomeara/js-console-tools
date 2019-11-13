@@ -1,4 +1,4 @@
-const mergeDeep = (...objects) => {
+var mergeDeep = (...objects) => {
     const isObject = obj => obj && typeof obj === 'object';
 
     return objects.reduce((prev, obj) => {
