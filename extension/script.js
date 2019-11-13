@@ -22,7 +22,7 @@ var mergeDeep = (...objects) => {
 };
 
 // example: findVal({obj}, 123);
-function findVal(obj = {}, item) {
+function findVal(obj = {}, item, predicate = (a, b) => (a === b)) {
     function find(obj, item) {
         if (find.path === undefined) {
             find.path = [];
@@ -40,7 +40,7 @@ function findVal(obj = {}, item) {
             find.path[find.level] = key;
             if (obj[key] && typeof obj[key] === "object") {
                 find(obj[key], item);
-            } else if (obj[key] === item) {
+            } else if (predicate(obj[key], item)) {
                 find.result.push(`["${find.path.join('"]["')}"]`);
             }
         }
