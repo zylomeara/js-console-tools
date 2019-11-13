@@ -1,3 +1,8 @@
+var PREDICATES = {
+    includes: (a, b) => String(a).includes(b),
+    equals: (a, b) => a === b,
+};
+
 var mergeDeep = (...objects) => {
     const isObject = obj => obj && typeof obj === 'object';
 
@@ -22,7 +27,7 @@ var mergeDeep = (...objects) => {
 };
 
 // example: findVal({obj}, 123);
-function findVal(obj = {}, item, predicate = (a, b) => (a === b)) {
+function findVal(obj = {}, item, predicate = PREDICATES.equals) {
     function find(obj, item) {
         if (find.path === undefined) {
             find.path = [];
