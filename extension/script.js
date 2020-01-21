@@ -65,17 +65,18 @@ function findVal(obj = {}, item, predicate = PREDICATES.equals) {
     return find.result.map(res => varName + res);
 }
 
-// example: findKey({obj: objWithDuplicates, key: "d"});
+// example: findKey({obj: objWithDuplicates, val: "d", key: "d"});
 function findKey(options) {
     let results = [];
 
     (function findKeyItem({
-                          key,
-                          obj,
-                          pathToKey,
-                      }) {
+                              key,
+                              obj,
+                              val,
+                              pathToKey,
+                          }) {
         const oldPath = `${pathToKey ? pathToKey + "." : ""}`;
-        if (obj.hasOwnProperty(key)) {
+        if (obj.hasOwnProperty(key) && (val === undefined ? true : obj[key] === val)) {
             results.push(`${oldPath}${key}`);
             return;
         }
