@@ -28,41 +28,27 @@ var mergeDeep = (...objects) => {
 
 // example: findVal({obj}, 123);
 function findVal(obj = {}, item, predicate = PREDICATES.equals) {
-    function find(obj, item) {
-        if (find.path === undefined) {
-            find.path = [];
-        }
-        if (find.result === undefined) {
-            find.result = [];
-        }
-        if (find.level === undefined) {
-            find.level = 0;
-        } else {
-            find.level += 1;
-        }
+    let result = [];
+    let path = [];
+    let index = -1;
 
+    function find(obj, item) {
         for (var key in obj) {
-            find.path[find.level] = key;
+            path[index] = key;
             if (obj[key] && typeof obj[key] === "object") {
                 find(obj[key], item);
             } else if (predicate(obj[key], item)) {
-                find.result.push(`["${find.path.join('"]["')}"]`);
+                result.push(`["${path.join('"]["')}"]`);
             }
         }
-        find.level -= 1;
-        find.path.pop();
+        index -= 1;
+        path.pop();
     }
-
-    find.resetResult = () => {
-        find.path = undefined;
-        find.result = undefined;
-        find.level = undefined;
-    };
     var varName = Object.keys(obj)[0];
-    find.resetResult();
+
     find(obj[varName], item);
 
-    return find.result.map(res => varName + res);
+    return result.map(res => varName + res);
 }
 
 // example: findKey({obj: objWithDuplicates, val: "d", key: "d"});
