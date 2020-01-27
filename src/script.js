@@ -6,6 +6,7 @@ var PREDICATES = {
     includes: (a, b) => String(a).includes(b),
     equals: (a, b) => a === b,
 };
+window.PREDICATES = PREDICATES;
 
 var mergeDeep = (...objects) => {
     const isObject = obj => obj && typeof obj === 'object';
@@ -37,6 +38,7 @@ function findVal(obj = {}, item, predicate = PREDICATES.equals) {
     let index = -1;
 
     function find(obj, item) {
+        index++;
         for (var key in obj) {
             path[index] = key;
             if (obj[key] && typeof obj[key] === "object") {
@@ -54,9 +56,20 @@ function findVal(obj = {}, item, predicate = PREDICATES.equals) {
 
     return result.map(res => varName + res);
 }
+window.findVal = findVal;
 
 // example: findValWithoutRecursion({obj}, 123);
-function findValWithoutRecursion(obj = {}, item, {predicate = PREDICATES.equals, timeout = 0, throttle = 0}) {
+function findValWithoutRecursion(
+  obj = {},
+  item,
+  {
+      predicate = PREDICATES.equals,
+      timeout = 0,
+      throttle = 0,
+      deepLevel = 0,
+  } = {},
+  ) {
+    console.log(1);
     let result = [];
     let scopes = [];
     let varName = Object.keys(obj)[0];
@@ -92,13 +105,15 @@ function findValWithoutRecursion(obj = {}, item, {predicate = PREDICATES.equals,
             scope.currentKey = scope.keys[scope.currentIndex];
 
             if (scope.value[scope.currentKey] && typeof scope.value[scope.currentKey] === "object") {
-                scopes.push({
-                    keys: Object.keys(scope.value[scope.currentKey]),
-                    currentKey: Object.keys(scope.value[scope.currentKey])[0],
-                    currentIndex: 0,
-                    thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
-                    value: scope.value[scope.currentKey],
-                });
+                if (scopes.length < deepLevel || deepLevel === 0) {
+                    scopes.push({
+                        keys: Object.keys(scope.value[scope.currentKey]),
+                        currentKey: Object.keys(scope.value[scope.currentKey])[0],
+                        currentIndex: 0,
+                        thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
+                        value: scope.value[scope.currentKey],
+                    });
+                }
                 scope.currentIndex++;
                 continue loop1;
             } else if (predicate(scope.value[scope.currentKey], item)) {
@@ -154,3 +169,4 @@ function findKey(options) {
 
     return results;
 }
+window.findKey = findKey;
