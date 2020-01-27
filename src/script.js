@@ -69,7 +69,6 @@ function findValWithoutRecursion(
       deepLevel = 0,
   } = {},
   ) {
-    console.log(1);
     let result = [];
     let scopes = [];
     let varName = Object.keys(obj)[0];
@@ -80,7 +79,6 @@ function findValWithoutRecursion(
         currentIndex: 0,
         thresholdIndex: Object.keys(searchObject).length - 1,
         value: searchObject,
-        done: false,
     });
     let throttleLog = _.throttle(() => console.log('Result: ', result), throttle);
     let timeStart = (new Date()).getTime();
@@ -105,14 +103,19 @@ function findValWithoutRecursion(
             scope.currentKey = scope.keys[scope.currentIndex];
 
             if (scope.value[scope.currentKey] && typeof scope.value[scope.currentKey] === "object") {
-                if (scopes.length < deepLevel || deepLevel === 0) {
-                    scopes.push({
-                        keys: Object.keys(scope.value[scope.currentKey]),
-                        currentKey: Object.keys(scope.value[scope.currentKey])[0],
-                        currentIndex: 0,
-                        thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
-                        value: scope.value[scope.currentKey],
-                    });
+                if (typeof item === 'object' && predicate(scope.value[scope.currentKey], item)) {
+                    let path = scopes.map(s => s.currentKey);
+                    result.push(`["${path.join('"]["')}"]`);
+                } else {
+                    if (scopes.length < deepLevel || deepLevel === 0) {
+                        scopes.push({
+                            keys: Object.keys(scope.value[scope.currentKey]),
+                            currentKey: Object.keys(scope.value[scope.currentKey])[0],
+                            currentIndex: 0,
+                            thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
+                            value: scope.value[scope.currentKey],
+                        });
+                    }
                 }
                 scope.currentIndex++;
                 continue loop1;
