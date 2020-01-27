@@ -51,6 +51,52 @@ function findVal(obj = {}, item, predicate = PREDICATES.equals) {
     return result.map(res => varName + res);
 }
 
+// example: findValWithoutRecursion({obj}, 123);
+function findValWithoutRecursion(obj = {}, item, predicate = PREDICATES.equals) {
+    let result = [];
+    let scopes = [];
+    let varName = Object.keys(obj)[0];
+    let searchObject = Object.values(obj)[0];
+    scopes.push({
+        keys: Object.keys(searchObject),
+        currentKey: Object.keys(searchObject)[0],
+        currentIndex: 0,
+        thresholdIndex: Object.keys(searchObject).length - 1,
+        value: searchObject,
+        done: false,
+    });
+
+    if (Object.keys(searchObject).length === 0) {
+        throw Error('Пустой объект')
+    }
+
+    loop1:
+    while(true) {
+        let scope = scopes[scopes.length - 1];
+        if (!scope) return result.map(pathItem => `${varName}${pathItem}`);
+
+        for (; scope.currentIndex <= scope.thresholdIndex; scope.currentIndex++) {
+            scope.currentKey = scope.keys[scope.currentIndex];
+
+            if (scope.value[scope.currentKey] && typeof scope.value[scope.currentKey] === "object") {
+                scopes.push({
+                    keys: Object.keys(scope.value[scope.currentKey]),
+                    currentKey: Object.keys(scope.value[scope.currentKey])[0],
+                    currentIndex: 0,
+                    thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
+                    value: scope.value[scope.currentKey],
+                });
+                scope.currentIndex++;
+                continue loop1;
+            } else if (predicate(scope.value[scope.currentKey], item)) {
+                let path = scopes.map(s => s.currentKey);
+                result.push(`["${path.join('"]["')}"]`);
+            }
+        }
+        scopes.pop()
+    }
+}
+
 // example: findKey({obj: objWithDuplicates, val: "d", key: "d"});
 function findKey(options) {
     let results = [];
