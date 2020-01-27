@@ -1,0 +1,24 @@
+{
+  "name": "consoletools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node_modules/.bin/webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zylomeara/js-console-tools.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zylomeara/js-console-tools/issues"
+  },
+  "homepage": "https://github.com/zylomeara/js-console-tools#readme",
+  "dependencies": {
+    "underscore": "^1.9.2",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}

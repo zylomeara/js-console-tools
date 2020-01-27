@@ -1,3 +1,7 @@
+import _ from 'underscore';
+
+window._f = _;
+
 var PREDICATES = {
     includes: (a, b) => String(a).includes(b),
     equals: (a, b) => a === b,
@@ -52,7 +56,7 @@ function findVal(obj = {}, item, predicate = PREDICATES.equals) {
 }
 
 // example: findValWithoutRecursion({obj}, 123);
-function findValWithoutRecursion(obj = {}, item, predicate = PREDICATES.equals) {
+function findValWithoutRecursion(obj = {}, item, {predicate = PREDICATES.equals, timeout = 0, throttle = 0}) {
     let result = [];
     let scopes = [];
     let varName = Object.keys(obj)[0];
@@ -65,6 +69,9 @@ function findValWithoutRecursion(obj = {}, item, predicate = PREDICATES.equals) 
         value: searchObject,
         done: false,
     });
+    let throttleLog = _.throttle(() => console.log('Result: ', result), throttle);
+    let timeStart = (new Date()).getTime();
+    let timeEnd = timeStart + timeout;
 
     if (Object.keys(searchObject).length === 0) {
         throw Error('Пустой объект')
@@ -72,6 +79,12 @@ function findValWithoutRecursion(obj = {}, item, predicate = PREDICATES.equals) 
 
     loop1:
     while(true) {
+        if ((new Date()).getTime() > timeEnd && timeout !== 0) {
+            console.log('Result after timeout');
+            return result;
+        }
+
+        throttle && throttleLog();
         let scope = scopes[scopes.length - 1];
         if (!scope) return result.map(pathItem => `${varName}${pathItem}`);
 
@@ -96,6 +109,7 @@ function findValWithoutRecursion(obj = {}, item, predicate = PREDICATES.equals) 
         scopes.pop()
     }
 }
+window.findValWithoutRecursion = findValWithoutRecursion;
 
 // example: findKey({obj: objWithDuplicates, val: "d", key: "d"});
 function findKey(options) {
