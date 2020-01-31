@@ -80,7 +80,9 @@ function findValWithoutRecursion(
         thresholdIndex: Object.keys(searchObject).length - 1,
         value: searchObject,
     });
-    let throttleLog = _.throttle(() => console.log('Result: ', result), throttle);
+    let failureAccess = [];
+    let blockLog = false;
+    let throttleLog = _.throttle(() => !blockLog && console.log('Result: ', result), throttle);
     let timeStart = (new Date()).getTime();
     let timeEnd = timeStart + timeout;
 
@@ -92,36 +94,55 @@ function findValWithoutRecursion(
     while(true) {
         if ((new Date()).getTime() > timeEnd && timeout !== 0) {
             console.log('Result after timeout');
-            return result;
+            if (failureAccess.length) {
+                console.log('Failure access: ', failureAccess)
+            }
+            blockLog = true;
+            return result.map(pathItem => `${varName}${pathItem}`);
         }
 
         throttle && throttleLog();
         let scope = scopes[scopes.length - 1];
-        if (!scope) return result.map(pathItem => `${varName}${pathItem}`);
+        if (!scope) {
+            if (failureAccess.length) {
+                console.log('Failure access: ', failureAccess)
+            }
+            blockLog = true;
+            return result.map(pathItem => `${varName}${pathItem}`);
+        }
 
         for (; scope.currentIndex <= scope.thresholdIndex; scope.currentIndex++) {
             scope.currentKey = scope.keys[scope.currentIndex];
 
-            if (scope.value[scope.currentKey] && typeof scope.value[scope.currentKey] === "object") {
-                if (typeof item === 'object' && predicate(scope.value[scope.currentKey], item)) {
+            try {
+                if (scope.value[scope.currentKey] && typeof scope.value[scope.currentKey] === "object") {
+                    if (typeof item === 'object' && predicate(scope.value[scope.currentKey], item)) {
+                        let path = scopes.map(s => s.currentKey);
+                        result.push(`["${path.join('"]["')}"]`);
+                    } else {
+                        if (scopes.length < deepLevel || deepLevel === 0) {
+                            scopes.push({
+                                keys: Object.keys(scope.value[scope.currentKey]),
+                                currentKey: Object.keys(scope.value[scope.currentKey])[0],
+                                currentIndex: 0,
+                                thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
+                                value: scope.value[scope.currentKey],
+                            });
+                        }
+                    }
+                    scope.currentIndex++;
+                    continue loop1;
+                } else if (predicate(scope.value[scope.currentKey], item)) {
                     let path = scopes.map(s => s.currentKey);
                     result.push(`["${path.join('"]["')}"]`);
-                } else {
-                    if (scopes.length < deepLevel || deepLevel === 0) {
-                        scopes.push({
-                            keys: Object.keys(scope.value[scope.currentKey]),
-                            currentKey: Object.keys(scope.value[scope.currentKey])[0],
-                            currentIndex: 0,
-                            thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
-                            value: scope.value[scope.currentKey],
-                        });
-                    }
                 }
-                scope.currentIndex++;
-                continue loop1;
-            } else if (predicate(scope.value[scope.currentKey], item)) {
+            } catch (e) {
                 let path = scopes.map(s => s.currentKey);
-                result.push(`["${path.join('"]["')}"]`);
+
+                failureAccess.push({
+                    path: `${varName}["${path.join('"]["')}"]`,
+                    reason: e,
+                })
             }
         }
         scopes.pop()
