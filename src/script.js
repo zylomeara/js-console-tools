@@ -31,6 +31,16 @@ var mergeDeep = (...objects) => {
     }, {});
 };
 
+// The function is needed because the Object.keys does not work with the document
+function ObjectKeys(obj = {}) {
+    var set = new Set();
+    for (var i in obj) {
+        set.add(i);
+    }
+
+    return [...set];
+}
+
 // example: findVal({obj}, 123);
 function findVal(obj = {}, item, predicate = PREDICATES.equals) {
     let result = [];
@@ -74,10 +84,10 @@ function findValWithoutRecursion(
     let varName = Object.keys(obj)[0];
     let searchObject = Object.values(obj)[0];
     scopes.push({
-        keys: Object.keys(searchObject),
-        currentKey: Object.keys(searchObject)[0],
+        keys: ObjectKeys(searchObject),
+        currentKey: ObjectKeys(searchObject)[0],
         currentIndex: 0,
-        thresholdIndex: Object.keys(searchObject).length - 1,
+        thresholdIndex: ObjectKeys(searchObject).length - 1,
         value: searchObject,
     });
     let failureAccess = [];
@@ -86,7 +96,7 @@ function findValWithoutRecursion(
     let timeStart = (new Date()).getTime();
     let timeEnd = timeStart + timeout;
 
-    if (Object.keys(searchObject).length === 0) {
+    if (ObjectKeys(searchObject).length === 0) {
         throw Error('Пустой объект')
     }
 
@@ -122,10 +132,10 @@ function findValWithoutRecursion(
                     } else {
                         if (scopes.length < deepLevel || deepLevel === 0) {
                             scopes.push({
-                                keys: Object.keys(scope.value[scope.currentKey]),
-                                currentKey: Object.keys(scope.value[scope.currentKey])[0],
+                                keys: ObjectKeys(scope.value[scope.currentKey]),
+                                currentKey: ObjectKeys(scope.value[scope.currentKey])[0],
                                 currentIndex: 0,
-                                thresholdIndex: Object.keys(scope.value[scope.currentKey]).length - 1,
+                                thresholdIndex: ObjectKeys(scope.value[scope.currentKey]).length - 1,
                                 value: scope.value[scope.currentKey],
                             });
                         }
