@@ -66,9 +66,15 @@ function findVal(obj = {}, item, predicate = PREDICATES.equals) {
 
     return result.map(res => varName + res);
 }
+findVal.EXAMPLE = 'findVal({obj}, 123, PREDICATES.equals);';
 window.findVal = findVal;
 
-// example: findValWithoutRecursion({obj}, 123);
+// example: findValWithoutRecursion({obj}, 123, {
+//       predicate = PREDICATES.equals,
+//       timeout = 0,
+//       throttle = 0,
+//       deepLevel = 0,
+//   });
 function findValWithoutRecursion(
   obj = {},
   item,
@@ -158,6 +164,14 @@ function findValWithoutRecursion(
         scopes.pop()
     }
 }
+findValWithoutRecursion.EXAMPLE = `
+    findValWithoutRecursion({obj}, 123, {
+        predicate = PREDICATES.equals,
+        timeout = 0,
+        throttle = 0,
+        deepLevel = 0,
+    });
+`;
 window.findValWithoutRecursion = findValWithoutRecursion;
 
 // example: findKey({obj: objWithDuplicates, val: "d", key: "d"});
@@ -203,4 +217,5 @@ function findKey(options) {
 
     return results;
 }
+findKey.EXAMPLE = 'findKey({obj: objWithDuplicates, val: "d", key: "d"});';
 window.findKey = findKey;
