@@ -1,6 +1,9 @@
 import _ from 'underscore';
+import * as R from 'ramda';
 
 window._f = _;
+window._R = R;
+
 
 var PREDICATES = {
     includes: (a, b) => String(a).includes(b),
@@ -184,10 +187,10 @@ function findKey(options) {
                               val,
                               pathToKey,
                           }) {
-        const oldPath = `${pathToKey ? pathToKey + "." : ""}`;
+        const oldPath = `${pathToKey ? pathToKey + "" : ""}`;
         if (obj.hasOwnProperty(key) && (val === undefined ? true : obj[key] === val)) {
-            results.push(`${oldPath}${key}`);
-            return;
+            results.push(`${oldPath}['${key}']`);
+            // return;
         }
 
         if (obj !== null && typeof obj === "object" && !Array.isArray(obj)) {
@@ -207,7 +210,7 @@ function findKey(options) {
                         findKeyItem({
                             obj: obj[k],
                             key,
-                            pathToKey: `${oldPath}${k}`,
+                            pathToKey: `${oldPath}['${k}']`,
                         });
                     }
                 }
